@@ -5,6 +5,7 @@
     },
     "cSpell.words": [
         "dotenv",
-        "reqwest"
+        "reqwest",
+        "thiserror"
     ]
 }

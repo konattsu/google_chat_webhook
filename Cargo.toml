@@ -2,6 +2,7 @@
 name = "chat_webhook"
 version = "0.1.0"
 edition = "2021"
+authors = ["konattsu"]
 
 [dependencies]
 tokio = {version = "1.40.0", features = ["full"]}

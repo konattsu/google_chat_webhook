@@ -1,6 +1,6 @@
 use std::env;
 
-use chat_webhook::{ChatService, ExternalApiStruct, Message};
+use google_chat_webhook::{ChatService, ExternalApiStruct, Message};
 
 fn main() {
     dotenv::dotenv().ok();

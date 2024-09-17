@@ -1,5 +1,5 @@
 [package]
-name = "chat_webhook"
+name = "google_chat_webhook"
 version = "0.1.0"
 edition = "2021"
 authors = ["konattsu"]

@@ -1,30 +1,73 @@
-use crate::{DomainError, ExternalApi};
+#[cfg(feature = "blocking")]
+use crate::ExternalApiSync;
+use crate::{ExternalApiAsync, Message, WebhookError};
 
-use super::api_client::ApiClient;
+use super::api_client::ApiClientAsync;
+#[cfg(feature = "blocking")]
+use super::api_client::ApiClientSync;
 
-pub struct ExternalApiStruct {
-    client: ApiClient,
+#[derive(Debug)]
+pub struct ExternalApiStructAsync {
+    client: ApiClientAsync,
     webhook_url: String,
 }
 
-impl ExternalApiStruct {
+impl ExternalApiStructAsync {
     pub fn new(url: &str) -> Self {
         Self {
-            client: ApiClient::new(),
+            client: ApiClientAsync::new(),
             webhook_url: url.to_owned(),
         }
     }
 }
 
-impl ExternalApi for ExternalApiStruct {
-    fn post_message(&self, message: crate::Message) -> Result<(), DomainError> {
-        let mut url = self.webhook_url.clone();
+#[async_trait::async_trait]
+impl ExternalApiAsync for ExternalApiStructAsync {
+    async fn post_message(&self, message: Message) -> Result<(), WebhookError> {
+        let url = convert_url(&message, &self.webhook_url);
+        self.client.post_message(message, &url).await
+    }
+}
 
-        if message.has_thread() {
-            const THREAD_URL: &str = "&messageReplyOption=REPLY_MESSAGE_OR_FAIL";
-            url = format!("{}{}", url, THREAD_URL);
+#[cfg(feature = "blocking")]
+#[derive(Debug)]
+pub struct ExternalApiStructSync {
+    client: ApiClientSync,
+    webhook_url: String,
+}
+
+#[cfg(feature = "blocking")]
+impl ExternalApiStructSync {
+    pub fn new(url: &str) -> Self {
+        Self {
+            client: ApiClientSync::new(),
+            webhook_url: url.to_owned(),
         }
+    }
+}
 
+#[cfg(feature = "blocking")]
+impl ExternalApiSync for ExternalApiStructSync {
+    fn post_message(&self, message: crate::Message) -> Result<(), WebhookError> {
+        let url = convert_url(&message, &self.webhook_url);
         self.client.post_message(message, &url)
     }
+}
+
+// https://developers.google.com/workspace/chat/api/reference/
+// rest/v1/spaces.messages/create
+fn convert_url(message: &Message, url: &str) -> String {
+    if !message.has_thread() {
+        return url.to_owned();
+    }
+
+    format!(
+        "{}{}",
+        url,
+        if message.reply_only().unwrap() {
+            "&messageReplyOption=REPLY_MESSAGE_OR_FAIL"
+        } else {
+            "&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD"
+        }
+    )
 }

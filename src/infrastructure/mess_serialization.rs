@@ -19,7 +19,7 @@ impl Serialize for MessageWrapper {
         let mut state = serializer.serialize_struct("MessageWrapper", 2)?;
         state.serialize_field("text", &self.0.get_text())?;
 
-        if let Some(thread_id) = self.0.get_thread() {
+        if let Some(thread_id) = self.0.get_thread_id() {
             state.serialize_field("thread", &json!({"name": thread_id}))?;
         }
 
@@ -44,6 +44,8 @@ impl From<Message> for MessageWrapper {
 
 #[cfg(test)]
 mod tests {
+    use crate::Reply;
+
     use super::*;
 
     #[test]
@@ -56,7 +58,10 @@ mod tests {
     }
     #[test]
     fn test_for_message_wrapper_serialize_gives_valid_2() {
-        let message = Message::new("text_foo".into(), Some("thread_bar".into()));
+        let message = Message::new(
+            "text_foo".into(),
+            Some(Reply::new("thread_bar".into(), true)),
+        );
         assert_eq!(
             MessageWrapper::from(message).serialize_safe(),
             r#"{"text":"text_foo","thread":{"name":"thread_bar"}}"#,
@@ -66,10 +71,10 @@ mod tests {
     /// 特殊記号 `"` がエスケープされるかのテスト
     #[test]
     fn test_for_message_wrapper_serialize_gives_valid_3() {
-        let message = Message::new(r#"text_"foo"#.into(), None);
+        let message = Message::new(r#"text"foo"#.into(), None);
         assert_eq!(
             MessageWrapper::from(message).serialize_safe(),
-            r#"{"text":"text_\"foo"}"#
+            r#"{"text":"text\"foo"}"#
         );
     }
 }

@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum DomainError {
+pub enum WebhookError {
     #[error("Failed to processing with external api; `{0}`")]
     ExternalServiceError(String),
     #[error("Network error occurred; `{0}`")]

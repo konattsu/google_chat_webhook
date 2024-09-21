@@ -1,13 +1,16 @@
 [package]
 name = "google_chat_webhook"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["konattsu"]
 
 [dependencies]
-tokio = {version = "1.40.0", features = ["full"]}
 reqwest = {version = "0.12.7", features = ["rustls-tls", "blocking"]}
 serde = {version = "1.0.210", features = ["derive"]}
-serde_json ={ version = "1.0.128"}
-dotenv = "0.15"
+serde_json = { version = "1.0.128"}
 thiserror = "1.0.0"
+async-trait = "0.1.82"
+
+[features]
+default = []
+blocking = []

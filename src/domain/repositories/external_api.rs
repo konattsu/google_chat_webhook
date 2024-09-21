@@ -1,11 +1,11 @@
-use crate::{domain::DomainError, Message};
+use crate::{domain::WebhookError, Message};
 
-pub trait ExternalApi {
-    fn post_message(&self, message: Message) -> Result<(), DomainError>;
+#[async_trait::async_trait]
+pub trait ExternalApiAsync {
+    async fn post_message(&self, message: Message) -> Result<(), WebhookError>;
+}
 
-    // asyncと迷ったけど今のところ軽いのでsyncに
-    // fn post_data(
-    //     &self,
-    //     message: Message,
-    // ) -> Pin<Box<dyn Future<Output = Result<(), DomainError>> + Send>>;
+#[cfg(feature = "blocking")]
+pub trait ExternalApiSync {
+    fn post_message(&self, message: Message) -> Result<(), WebhookError>;
 }
